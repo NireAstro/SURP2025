@@ -13,13 +13,12 @@ def load_catalog(file_path):
     if not file_path.endswith('.cmd.calibrate_ps'):
         raise ValueError("Unsupported file format. Must be .cmd.calibrate_ps")
 
-    column_labels = [
-        'ID', 'RA_z', 'Dec_z', 'ID_z', 'X_z', 'Y_z', 'mis_z', 'mis_z_err', 'Sky_z', 'qflag_z', '?1z', '?2z',
-        'RA_r', 'Dec_r', 'ID_r', 'X_r', 'Y_r', 'mis_r', 'mis_r_err', 'Sky_r', 'qflag_r', '?1r', '?2r',
-        'RA_u', 'Dec_u', 'ID_u', 'X_u', 'Y_u', 'mis_u', 'mis_u_err', 'Sky_u', 'qflag_u', '?1u', '?2u',
-        'RA_g', 'Dec_g', 'ID_g', 'X_g', 'Y_g', 'mis_g', 'mis_g_err', 'Sky_g', 'qflag_g', '?1g', '?2g',
-        'RA_i', 'Dec_i', 'ID_i', 'X_i', 'Y_i', 'mis_i', 'mis_i_err', 'Sky_i', 'qflag_i', '?1i', '?2i'
-    ]
+    column_labels = ['ID', 'RA_z', 'Dec_z', 'ID_z', 'X_z', 'Y_z', 'mis_z', 'mis_z_err', 'Sky_z', 'qflag_z', '?1z', '?2z',
+       'RA_r', 'Dec_r', 'ID_r', 'X_r', 'Y_r', 'mis_r', 'mis_r_err', 'Sky_r', 'qflag_r', '?1r', '?2r',
+       'RA_u', 'Dec_u', 'ID_u', 'X_u', 'Y_u', 'mis_u', 'mis_u_err', 'Sky_u', 'qflag_u', '?1u', '?2u',
+       'RA_g', 'Dec_g', 'ID_g', 'X_g', 'Y_g', 'mis_g', 'mis_g_err', 'Sky_g', 'qflag_g', '?1g', '?2g',
+       'RA_i', 'Dec_i', 'ID_i', 'X_i', 'Y_i', 'mis_i', 'mis_i_err', 'Sky_i', 'qflag_i', '?1i', '?2i',
+       'RA_Y', 'Dec_Y', 'ID_Y', 'X_Y', 'Y_Y', 'mis_Y', 'mis_Y_err', 'Sky_Y', 'qflag_Y', '?1Y', '?2Y']
 
     data = pd.read_csv(
         file_path,
@@ -127,53 +126,24 @@ def initialize_red_clump(data):
 
     return rc_model
 
-# === Automatic RC Selection ===
+# === Plot CMD ===
 
-def auto_color_mag_cut(
-    data,
-    clump_r,
-    clump_z,
-    color_width=0.5,
-    mag_width=1.0,
-    show_plot=True
-):
-    """Select stars near predicted red clump in CMD space."""
-
+def plot_cmd(data):
+    """Create a color-magnitude diagram."""
+    
     rmag = data['mis_r']
     color = data['rmz']
 
-    color_center = clump_r - clump_z
-    mag_center = clump_r
+   
+    fig = plt.figure(figsize=(6, 5))
+    plt.scatter(color, rmag, color = 'black', s=1, alpha=0.2, label='All stars')
 
-    color_cut = (color > color_center - color_width) & \
-                (color < color_center + color_width)
-
-    mag_cut = (rmag > mag_center - mag_width) & \
-              (rmag < mag_center + mag_width)
-
-    selected = data.loc[color_cut & mag_cut].copy()
-    print(f"Selected {len(selected)} red clump candidates")
-
-    if show_plot:
-        plt.figure(figsize=(6, 5))
-        plt.scatter(color, rmag, s=5, alpha=0.3, label='All stars')
-        plt.scatter(
-            selected['rmz'],
-            selected['mis_r'],
-            s=8,
-            color='red',
-            label='RC candidates'
-        )
-
-        plt.axvline(color_center, color='k', ls='--', lw=1)
-        plt.axhline(mag_center, color='k', ls='--', lw=1)
-
-        plt.gca().invert_yaxis()
-        plt.xlabel(r'$(r - z)$')
-        plt.ylabel(r'$r$')
-        plt.legend()
-        plt.title("Automatic Red Clump Selection")
-        plt.tight_layout()
-        plt.show()
-
-    return selected
+    plt.gca().invert_yaxis()
+    plt.xlabel(r'$(r - z)$')
+    plt.ylabel(r'$r$')
+    plt.legend()
+    plt.title("Color-Magnitude Diagram")
+    plt.tight_layout()
+    plt.show()
+    
+    return None
